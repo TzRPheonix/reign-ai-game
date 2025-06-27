@@ -174,6 +174,52 @@ const GameOver = styled.div`
   backdrop-filter: blur(15px);
   border: 2px solid rgba(255, 255, 255, 0.2);
   box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
+  z-index: 999;
+  position: relative;
+
+  h3 {
+    color: #FFD700;
+    font-size: 1.8rem;
+    margin-bottom: 15px;
+    font-weight: 800;
+    text-shadow: 0 2px 4px rgba(0,0,0,0.3);
+  }
+
+  p {
+    margin: 10px 0;
+    line-height: 1.5;
+    opacity: 0.95;
+  }
+`;
+
+const Overlay = styled.div`
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(0, 0, 0, 0.7);
+  backdrop-filter: blur(5px);
+  z-index: 998;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+`;
+
+const GameOverModal = styled.div`
+  background: rgba(255, 255, 255, 0.15);
+  padding: 30px;
+  border-radius: 20px;
+  backdrop-filter: blur(15px);
+  border: 2px solid rgba(255, 255, 255, 0.2);
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
+  z-index: 999;
+  position: relative;
+  max-width: 500px;
+  width: 90%;
+  text-align: center;
+  color: white;
+  font-size: 1.3rem;
 
   h3 {
     color: #FFD700;
@@ -235,7 +281,7 @@ interface GameContainerProps {
 const GameContainer: React.FC<GameContainerProps> = ({ onStatsUpdate, currentStats, onPendingChanges }) => {
   const [currentCardIndex, setCurrentCardIndex] = useState(0);
   const [gameOver, setGameOver] = useState(false);
-  const [gameResult, setGameResult] = useState<'defeat' | 'neutral'>('neutral');
+  const [gameResult, setGameResult] = useState<'defeat' | 'neutral' | 'victory'>('neutral');
   const [pendingChanges, setPendingChanges] = useState<Partial<GameStats> | null>(null);
 
   // Motion values pour le drag et la rotation
@@ -336,7 +382,7 @@ const GameContainer: React.FC<GameContainerProps> = ({ onStatsUpdate, currentSta
 
     // Déterminer les changements selon la direction
     let changesToApply: Partial<GameStats>;
-    
+
     if (direction === 'right') {
       // Swipe vers la droite = accepter (changements normaux)
       changesToApply = currentCard.statsChange;
@@ -455,90 +501,92 @@ const GameContainer: React.FC<GameContainerProps> = ({ onStatsUpdate, currentSta
 
     return (
       <GameContainerWrapper>
-        <GameOver>
-          {resultType === 'defeat' ? (
-            <>
-              <h3>💥 Échec Critique</h3>
-              {criticalReason && (
-                <div style={{ marginBottom: '15px', padding: '12px', background: 'rgba(255, 107, 107, 0.2)', borderRadius: '8px', border: '1px solid rgba(255, 107, 107, 0.3)' }}>
-                  <p style={{ margin: '0 0 8px 0', color: '#FF6B6B', fontWeight: 'bold' }}>
-                    🚨 Cause de l'échec : {criticalReason.stat === 'environnement' ? '🌱 Environnement' :
-                                          criticalReason.stat === 'intelligence Artificielle' ? '🤖 Intelligence Artificielle' :
-                                          criticalReason.stat === 'humanite' ? '👥 Humanité' : '⚖️ Éthique'}
-                    a atteint {criticalReason.value} !
-                  </p>
-                  <p style={{ margin: '0', fontSize: '0.9rem', opacity: '0.9' }}>
-                    {criticalReason.direction === 'trop élevée' ?
-                      `Cette dimension est devenue excessive et incontrôlable, causant un déséquilibre majeur dans l'écosystème de l'IA for Good.` :
-                      `Cette dimension a été négligée au point de compromettre l'efficacité et la légitimité de l'IA for Good.`
-                    }
-                  </p>
+        <Overlay>
+          <GameOverModal>
+            {resultType === 'defeat' ? (
+              <>
+                <h3>💥 Échec Critique</h3>
+                {criticalReason && (
+                  <div style={{ marginBottom: '15px', padding: '12px', background: 'rgba(255, 107, 107, 0.2)', borderRadius: '8px', border: '1px solid rgba(255, 107, 107, 0.3)' }}>
+                    <p style={{ margin: '0 0 8px 0', color: '#FF6B6B', fontWeight: 'bold' }}>
+                      🚨 Cause de l'échec : {criticalReason.stat === 'environnement' ? '🌱 Environnement' :
+                                            criticalReason.stat === 'intelligence Artificielle' ? '🤖 Intelligence Artificielle' :
+                                            criticalReason.stat === 'humanite' ? '👥 Humanité' : '⚖️ Éthique'}
+                      a atteint {criticalReason.value} !
+                    </p>
+                    <p style={{ margin: '0', fontSize: '0.9rem', opacity: '0.9' }}>
+                      {criticalReason.direction === 'trop élevée' ?
+                        `Cette dimension est devenue excessive et incontrôlable, causant un déséquilibre majeur dans l'écosystème de l'IA for Good.` :
+                        `Cette dimension a été négligée au point de compromettre l'efficacité et la légitimité de l'IA for Good.`
+                      }
+                    </p>
+                  </div>
+                )}
+                <p>L'IA a perdu son équilibre et ne peut plus servir le bien commun efficacement.</p>
+                <p>Vous avez survécu {currentCardIndex} mois sur {gameCards.length}.</p>
+
+                <div style={{ marginTop: '20px', textAlign: 'left' }}>
+                  <h4 style={{ color: '#FFD700', marginBottom: '10px' }}>📊 Analyse Détaillée :</h4>
+                  {Object.entries(analysis).map(([key, value]) => (
+                    <div key={key} style={{ marginBottom: '8px', fontSize: '0.9rem' }}>
+                      <strong style={{ color: value.status === 'critique' ? '#FF6B6B' : '#FFD700' }}>
+                        {key === 'environnement' ? '🌱' : key === 'intelligenceArtificielle' ? '🤖' : key === 'humanite' ? '👥' : '⚖️'} {key.charAt(0).toUpperCase() + key.slice(1)} ({currentStats[key as keyof GameStats]}):
+                      </strong>
+                      <span style={{ color: value.status === 'critique' ? '#FF6B6B' : 'white' }}>
+                        {value.message}
+                      </span>
+                    </div>
+                  ))}
                 </div>
-              )}
-              <p>L'IA a perdu son équilibre et ne peut plus servir le bien commun efficacement.</p>
-              <p>Vous avez survécu {currentCardIndex} mois sur {gameCards.length}.</p>
+              </>
+            ) : resultType === 'victory' ? (
+              <>
+                <h3>🏆 Victoire Équilibrée</h3>
+                <p>Félicitations ! Vous avez réussi à maintenir un équilibre parfait entre toutes les dimensions.</p>
+                <p>Votre gestion de l'IA for Good a été exemplaire et responsable.</p>
+                <p>Vous avez terminé {gameCards.length} mois de mandat avec succès !</p>
 
-              <div style={{ marginTop: '20px', textAlign: 'left' }}>
-                <h4 style={{ color: '#FFD700', marginBottom: '10px' }}>📊 Analyse Détaillée :</h4>
-                {Object.entries(analysis).map(([key, value]) => (
-                  <div key={key} style={{ marginBottom: '8px', fontSize: '0.9rem' }}>
-                    <strong style={{ color: value.status === 'critique' ? '#FF6B6B' : '#FFD700' }}>
-                      {key === 'environnement' ? '🌱' : key === 'intelligenceArtificielle' ? '🤖' : key === 'humanite' ? '👥' : '⚖️'} {key.charAt(0).toUpperCase() + key.slice(1)} ({currentStats[key as keyof GameStats]}):
-                    </strong>
-                    <span style={{ color: value.status === 'critique' ? '#FF6B6B' : 'white' }}>
-                      {value.message}
-                    </span>
-                  </div>
-                ))}
-              </div>
-            </>
-          ) : resultType === 'victory' ? (
-            <>
-              <h3>🏆 Victoire Équilibrée</h3>
-              <p>Félicitations ! Vous avez réussi à maintenir un équilibre parfait entre toutes les dimensions.</p>
-              <p>Votre gestion de l'IA for Good a été exemplaire et responsable.</p>
-              <p>Vous avez terminé {gameCards.length} mois de mandat avec succès !</p>
+                <div style={{ marginTop: '20px', textAlign: 'left' }}>
+                  <h4 style={{ color: '#4CAF50', marginBottom: '10px' }}>📊 Analyse Détaillée :</h4>
+                  {Object.entries(analysis).map(([key, value]) => (
+                    <div key={key} style={{ marginBottom: '8px', fontSize: '0.9rem' }}>
+                      <strong style={{ color: '#4CAF50' }}>
+                        {key === 'environnement' ? '🌱' : key === 'intelligenceArtificielle' ? '🤖' : key === 'humanite' ? '👥' : '⚖️'} {key.charAt(0).toUpperCase() + key.slice(1)} ({currentStats[key as keyof GameStats]}):
+                      </strong>
+                      <span style={{ color: 'white' }}>
+                        {value.message}
+                      </span>
+                    </div>
+                  ))}
+                </div>
+              </>
+            ) : (
+              <>
+                <h3>🏁 Fin de Mandat</h3>
+                <p>Vous avez terminé votre période de gestion de l'IA for Good.</p>
+                <p>Vos décisions ont façonné l'avenir de l'IA pour le bien commun.</p>
+                <p>Vous avez survécu {gameCards.length} mois complets !</p>
 
-              <div style={{ marginTop: '20px', textAlign: 'left' }}>
-                <h4 style={{ color: '#4CAF50', marginBottom: '10px' }}>📊 Analyse Détaillée :</h4>
-                {Object.entries(analysis).map(([key, value]) => (
-                  <div key={key} style={{ marginBottom: '8px', fontSize: '0.9rem' }}>
-                    <strong style={{ color: '#4CAF50' }}>
-                      {key === 'environnement' ? '🌱' : key === 'intelligenceArtificielle' ? '🤖' : key === 'humanite' ? '👥' : '⚖️'} {key.charAt(0).toUpperCase() + key.slice(1)} ({currentStats[key as keyof GameStats]}):
-                    </strong>
-                    <span style={{ color: 'white' }}>
-                      {value.message}
-                    </span>
-                  </div>
-                ))}
-              </div>
-            </>
-          ) : (
-            <>
-              <h3>🏁 Fin de Mandat</h3>
-              <p>Vous avez terminé votre période de gestion de l'IA for Good.</p>
-              <p>Vos décisions ont façonné l'avenir de l'IA pour le bien commun.</p>
-              <p>Vous avez survécu {gameCards.length} mois complets !</p>
-
-              <div style={{ marginTop: '20px', textAlign: 'left' }}>
-                <h4 style={{ color: '#FFD700', marginBottom: '10px' }}>📊 Analyse Détaillée :</h4>
-                {Object.entries(analysis).map(([key, value]) => (
-                  <div key={key} style={{ marginBottom: '8px', fontSize: '0.9rem' }}>
-                    <strong style={{ color: value.status === 'faible' ? '#FF9800' : value.status === 'excellent' ? '#4CAF50' : '#FFD700' }}>
-                      {key === 'environnement' ? '🌱' : key === 'intelligenceArtificielle' ? '🤖' : key === 'humanite' ? '👥' : '⚖️'} {key.charAt(0).toUpperCase() + key.slice(1)} ({currentStats[key as keyof GameStats]}):
-                    </strong>
-                    <span style={{ color: 'white' }}>
-                      {value.message}
-                    </span>
-                  </div>
-                ))}
-              </div>
-            </>
-          )}
-          <RestartButton onClick={restartGame}>
-            Recommencer
-          </RestartButton>
-        </GameOver>
+                <div style={{ marginTop: '20px', textAlign: 'left' }}>
+                  <h4 style={{ color: '#FFD700', marginBottom: '10px' }}>📊 Analyse Détaillée :</h4>
+                  {Object.entries(analysis).map(([key, value]) => (
+                    <div key={key} style={{ marginBottom: '8px', fontSize: '0.9rem' }}>
+                      <strong style={{ color: value.status === 'faible' ? '#FF9800' : value.status === 'excellent' ? '#4CAF50' : '#FFD700' }}>
+                        {key === 'environnement' ? '🌱' : key === 'intelligenceArtificielle' ? '🤖' : key === 'humanite' ? '👥' : '⚖️'} {key.charAt(0).toUpperCase() + key.slice(1)} ({currentStats[key as keyof GameStats]}):
+                      </strong>
+                      <span style={{ color: 'white' }}>
+                        {value.message}
+                      </span>
+                    </div>
+                  ))}
+                </div>
+              </>
+            )}
+            <RestartButton onClick={restartGame}>
+              Recommencer
+            </RestartButton>
+          </GameOverModal>
+        </Overlay>
       </GameContainerWrapper>
     );
   }

@@ -1,0 +1,28 @@
+.start-button {
+    margin-top: 20px;
+}
+
+.game-container {
+    height: fit-content !important;
+}
+
+.card {
+    min-height: fit-content;
+    margin: 30px 0;
+    height: fit-content !important;
+}
+
+
+.card-description {
+    margin-top: 10px;
+}
+
+.card-content {
+    height: fit-content !important;
+}
+
+
+
+.swipe-instructions {
+    margin-top: 30px !important;
+}

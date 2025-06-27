@@ -1,5 +1,6 @@
-import React from 'react';
+import React, { useState } from 'react';
 import styled from 'styled-components';
+import { motion, AnimatePresence } from 'framer-motion';
 import { GameStats } from '../types/gameTypes';
 
 const StatsContainer = styled.div`
@@ -36,18 +37,64 @@ const StatsGrid = styled.div`
   gap: 12px;
 `;
 
-const StatItem = styled.div`
+const StatItem = styled.div<{ isHighlighted: boolean; highlightColor?: string }>`
   text-align: center;
   padding: 10px;
-  background: rgba(255, 255, 255, 0.1);
+  background: ${props => {
+    if (!props.isHighlighted) return 'rgba(255, 255, 255, 0.1)';
+    if (props.highlightColor === 'red') return 'rgba(255, 107, 107, 0.3)';
+    if (props.highlightColor === 'green') return 'rgba(76, 175, 80, 0.3)';
+    return 'rgba(255, 215, 0, 0.3)';
+  }};
   border-radius: 12px;
-  border: 1px solid rgba(255, 255, 255, 0.2);
+  border: 1px solid ${props => {
+    if (!props.isHighlighted) return 'rgba(255, 255, 255, 0.2)';
+    if (props.highlightColor === 'red') return 'rgba(255, 107, 107, 0.6)';
+    if (props.highlightColor === 'green') return 'rgba(76, 175, 80, 0.6)';
+    return 'rgba(255, 215, 0, 0.6)';
+  }};
   transition: all 0.3s ease;
+  position: relative;
+  cursor: help;
+  box-shadow: ${props => {
+    if (!props.isHighlighted) return 'none';
+    if (props.highlightColor === 'red') return '0 0 20px rgba(255, 107, 107, 0.4)';
+    if (props.highlightColor === 'green') return '0 0 20px rgba(76, 175, 80, 0.4)';
+    return '0 0 20px rgba(255, 215, 0, 0.4)';
+  }};
 
   &:hover {
-    background: rgba(255, 255, 255, 0.15);
+    background: ${props => {
+      if (!props.isHighlighted) return 'rgba(255, 255, 255, 0.15)';
+      if (props.highlightColor === 'red') return 'rgba(255, 107, 107, 0.4)';
+      if (props.highlightColor === 'green') return 'rgba(76, 175, 80, 0.4)';
+      return 'rgba(255, 215, 0, 0.4)';
+    }};
     transform: scale(1.02);
   }
+
+  ${props => props.isHighlighted && `
+    animation: highlightPulse 2s ease-in-out infinite;
+
+    @keyframes highlightPulse {
+      0%, 100% {
+        box-shadow: ${props.highlightColor === 'red' ? '0 0 20px rgba(255, 107, 107, 0.4)' :
+                     props.highlightColor === 'green' ? '0 0 20px rgba(76, 175, 80, 0.4)' :
+                     '0 0 20px rgba(255, 215, 0, 0.4)'};
+        border-color: ${props.highlightColor === 'red' ? 'rgba(255, 107, 107, 0.6)' :
+                       props.highlightColor === 'green' ? 'rgba(76, 175, 80, 0.6)' :
+                       'rgba(255, 215, 0, 0.6)'};
+      }
+      50% {
+        box-shadow: ${props.highlightColor === 'red' ? '0 0 30px rgba(255, 107, 107, 0.7)' :
+                     props.highlightColor === 'green' ? '0 0 30px rgba(76, 175, 80, 0.7)' :
+                     '0 0 30px rgba(255, 215, 0, 0.7)'};
+        border-color: ${props.highlightColor === 'red' ? 'rgba(255, 107, 107, 0.8)' :
+                       props.highlightColor === 'green' ? 'rgba(76, 175, 80, 0.8)' :
+                       'rgba(255, 215, 0, 0.8)'};
+      }
+    }
+  `}
 `;
 
 const StatLabel = styled.div`
@@ -70,15 +117,15 @@ const StatValue = styled.div<{ isCritical: boolean }>`
 
   ${props => props.isCritical && `
     animation: criticalPulse 1s infinite;
-    
+
     @keyframes criticalPulse {
-      0% { 
+      0% {
         text-shadow: 0 2px 4px rgba(0,0,0,0.3), 0 0 0 0 rgba(255, 107, 107, 0.7);
       }
-      70% { 
+      70% {
         text-shadow: 0 2px 4px rgba(0,0,0,0.3), 0 0 0 10px rgba(255, 107, 107, 0);
       }
-      100% { 
+      100% {
         text-shadow: 0 2px 4px rgba(0,0,0,0.3), 0 0 0 0 rgba(255, 107, 107, 0);
       }
     }
@@ -93,7 +140,7 @@ const StatBar = styled.div<{ value: number; color: string; isCritical: boolean }
   overflow: hidden;
   position: relative;
   box-shadow: inset 0 2px 4px rgba(0, 0, 0, 0.1);
-  
+
   &::after {
     content: '';
     display: block;
@@ -104,26 +151,69 @@ const StatBar = styled.div<{ value: number; color: string; isCritical: boolean }
     transition: width 0.5s ease, background 0.3s ease;
     box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
   }
-  
+
   ${props => props.isCritical && `
     animation: barPulse 1s infinite;
-    
+
     @keyframes barPulse {
-      0% { 
+      0% {
         box-shadow: inset 0 2px 4px rgba(0, 0, 0, 0.1), 0 0 0 0 rgba(255, 107, 107, 0.7);
       }
-      70% { 
+      70% {
         box-shadow: inset 0 2px 4px rgba(0, 0, 0, 0.1), 0 0 0 8px rgba(255, 107, 107, 0);
       }
-      100% { 
+      100% {
         box-shadow: inset 0 2px 4px rgba(0, 0, 0, 0.1), 0 0 0 0 rgba(255, 107, 107, 0);
       }
     }
   `}
 `;
 
+const Tooltip = styled(motion.div)`
+  position: absolute;
+  bottom: 80%;
+  left: -20px;
+  transform: translateX(-50%);
+  background: rgba(0, 0, 0, 0.9);
+  color: white;
+  padding: 12px;
+  border-radius: 8px;
+  font-size: 0.8rem;
+  line-height: 1.4;
+  width: 200px;
+  z-index: 9999;
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
+  pointer-events: none;
+  white-space: normal;
+  text-align: center;
+
+  &::after {
+    content: '';
+    position: absolute;
+    top: 100%;
+    left: 50%;
+    transform: translateX(-50%);
+    border: 6px solid transparent;
+    border-top-color: rgba(0, 0, 0, 0.79);
+  }
+`;
+
+const TooltipTitle = styled.div`
+  font-weight: 700;
+  margin-bottom: 6px;
+  color: #FFD700;
+  font-size: 0.9rem;
+`;
+
+const TooltipContent = styled.div`
+  opacity: 0.9;
+  font-size: 0.75rem;
+`;
+
 interface StatsDisplayProps {
   stats: GameStats;
+  pendingChanges?: Partial<GameStats> | null;
 }
 
 const getStatColor = (statName: keyof GameStats): string => {
@@ -146,8 +236,47 @@ const getStatLabel = (statName: keyof GameStats): string => {
   return labels[statName];
 };
 
-const StatsDisplay: React.FC<StatsDisplayProps> = ({ stats }) => {
+const getStatTooltip = (statName: keyof GameStats): { title: string; content: string } => {
+  const tooltips = {
+    environnement: {
+      title: '🌱 Environnement',
+      content: 'Impact écologique des technologies IA. Équilibrez entre innovation technologique et préservation de la planète. Une valeur trop basse = dégradation environnementale, trop haute = frein au développement.'
+    },
+    intelligenceArtificielle: {
+      title: '🤖 Intelligence Artificielle',
+      content: 'Avancées technologiques et capacités de l\'IA. Développez l\'innovation responsable sans compromettre l\'éthique. Une valeur trop basse = retard technologique, trop haute = IA incontrôlable.'
+    },
+    humanite: {
+      title: '👥 Humanité',
+      content: 'Impact sur la société et le bien-être humain. Privilégiez les solutions qui améliorent la vie des gens. Une valeur trop basse = déshumanisation, trop haute = dépendance excessive à l\'IA.'
+    },
+    ethique: {
+      title: '⚖️ Éthique',
+      content: 'Respect des valeurs morales et de la vie privée. Maintenez l\'équilibre entre utilité et éthique. Une valeur trop basse = violations éthiques, trop haute = paralysie par excès de précaution.'
+    }
+  };
+  return tooltips[statName];
+};
+
+const StatsDisplay: React.FC<StatsDisplayProps> = ({ stats, pendingChanges }) => {
+  const [hoveredStat, setHoveredStat] = useState<keyof GameStats | null>(null);
   const isCritical = (value: number) => value <= 10 || value >= 90;
+
+  // Fonction pour calculer la couleur de surbrillance selon l'impact
+  const getHighlightColor = (statKey: keyof GameStats): string | undefined => {
+    if (!pendingChanges || pendingChanges[statKey] === undefined) return undefined;
+
+    const currentValue = stats[statKey];
+    const change = pendingChanges[statKey]!;
+    const newValue = currentValue + change;
+
+    // Calculer la distance par rapport au centre (50)
+    const currentDistance = Math.abs(currentValue - 50);
+    const newDistance = Math.abs(newValue - 50);
+
+    // Rouge si on s'éloigne du centre, vert si on s'en rapproche
+    return newDistance > currentDistance ? 'red' : 'green';
+  };
 
   return (
     <StatsContainer>
@@ -155,15 +284,38 @@ const StatsDisplay: React.FC<StatsDisplayProps> = ({ stats }) => {
       <StatsGrid>
         {Object.entries(stats).map(([key, value]) => {
           const critical = isCritical(value);
+          const tooltip = getStatTooltip(key as keyof GameStats);
+          const highlightColor = getHighlightColor(key as keyof GameStats);
+
           return (
-            <StatItem key={key}>
+            <StatItem
+              key={key}
+              onMouseEnter={() => setHoveredStat(key as keyof GameStats)}
+              onMouseLeave={() => setHoveredStat(null)}
+              isHighlighted={!!(pendingChanges && pendingChanges[key as keyof GameStats] !== undefined)}
+              highlightColor={highlightColor}
+            >
               <StatLabel>{getStatLabel(key as keyof GameStats)}</StatLabel>
               <StatValue isCritical={critical}>{value}</StatValue>
-              <StatBar 
-                value={value} 
+              <StatBar
+                value={value}
                 color={getStatColor(key as keyof GameStats)}
                 isCritical={critical}
               />
+
+              <AnimatePresence>
+                {hoveredStat === key && (
+                  <Tooltip
+                    initial={{ opacity: 0, y: 10, scale: 0.9 }}
+                    animate={{ opacity: 1, y: 0, scale: 1 }}
+                    exit={{ opacity: 0, y: 10, scale: 0.9 }}
+                    transition={{ duration: 0.2 }}
+                  >
+                    <TooltipTitle>{tooltip.title}</TooltipTitle>
+                    <TooltipContent>{tooltip.content}</TooltipContent>
+                  </Tooltip>
+                )}
+              </AnimatePresence>
             </StatItem>
           );
         })}
@@ -172,4 +324,4 @@ const StatsDisplay: React.FC<StatsDisplayProps> = ({ stats }) => {
   );
 };
 
-export default StatsDisplay; 
+export default StatsDisplay;

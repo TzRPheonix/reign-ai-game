@@ -4,6 +4,7 @@ import GameContainer from './components/GameContainer';
 import StatsDisplay from './components/StatsDisplay';
 import { GameStats } from './types/gameTypes';
 import './App.css';
+import './custom.css';
 
 const AppContainer = styled.div`
   min-height: 100vh;
@@ -26,7 +27,7 @@ const AppContainer = styled.div`
     left: 0;
     right: 0;
     bottom: 0;
-    background: 
+    background:
       radial-gradient(circle at 20% 80%, rgba(255, 215, 0, 0.1) 0%, transparent 50%),
       radial-gradient(circle at 80% 20%, rgba(255, 165, 0, 0.1) 0%, transparent 50%),
       radial-gradient(circle at 40% 40%, rgba(255, 107, 107, 0.05) 0%, transparent 50%);
@@ -325,12 +326,13 @@ function App() {
   const [gameEnded, setGameEnded] = useState(false);
   const [endReason, setEndReason] = useState<string>('');
   const [gameStarted, setGameStarted] = useState(false);
+  const [pendingChanges, setPendingChanges] = useState<Partial<GameStats> | null>(null);
 
   // useEffect pour détecter immédiatement la fin de partie
   useEffect(() => {
     const checkGameEnd = () => {
       const stats = Object.entries(gameStats);
-      
+
       for (const [statName, value] of stats) {
         if (value <= 0) {
           setGameEnded(true);
@@ -361,6 +363,10 @@ function App() {
     });
   };
 
+  const handlePendingChanges = (changes: Partial<GameStats> | null) => {
+    setPendingChanges(changes);
+  };
+
   const resetGame = () => {
     setGameStats({
       environnement: 50,
@@ -371,6 +377,7 @@ function App() {
     setGameEnded(false);
     setEndReason('');
     setGameStarted(false);
+    setPendingChanges(null);
   };
 
   const startGame = () => {
@@ -384,27 +391,27 @@ function App() {
         <div></div>
         <div></div>
       </FloatingParticles>
-      
+
       <Header>
         <Title>IA for Good</Title>
         <Subtitle>Gestionnaire d'Intelligence Artificielle</Subtitle>
       </Header>
-      
+
       {!gameStarted ? (
         <RoleDescription>
           <RoleTitle>🎯 Votre Mission</RoleTitle>
           <RoleText>
-            Vous êtes le gestionnaire principal de l'IA for Good. Le peuple vous présente des demandes 
-            d'utilisation de l'IA. Votre rôle : maintenir l'équilibre entre intelligence artificielle, environnement, 
+            Vous êtes le gestionnaire principal de l'IA for Good. Le peuple vous présente des demandes
+            d'utilisation de l'IA. Votre rôle : maintenir l'équilibre entre intelligence artificielle, environnement,
             humanité et éthique. Une dimension qui prend le dessus = échec critique !
           </RoleText>
-          <StartButton onClick={startGame}>
+          <StartButton className='start-button' onClick={startGame}>
             Commencer le Jeu
           </StartButton>
         </RoleDescription>
       ) : (
         <GameWrapper>
-          <StatsDisplay stats={gameStats} />
+          <StatsDisplay stats={gameStats} pendingChanges={pendingChanges} />
           {gameEnded ? (
             <GameEndContainer>
               <GameEndTitle>💥 FIN DE PARTIE</GameEndTitle>
@@ -414,7 +421,11 @@ function App() {
               </ResetButton>
             </GameEndContainer>
           ) : (
-            <GameContainer onStatsUpdate={updateStats} currentStats={gameStats} />
+            <GameContainer
+              onStatsUpdate={updateStats}
+              currentStats={gameStats}
+              onPendingChanges={handlePendingChanges}
+            />
           )}
         </GameWrapper>
       )}

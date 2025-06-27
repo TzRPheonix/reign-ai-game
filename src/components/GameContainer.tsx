@@ -1,7 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import styled from 'styled-components';
 import { motion, AnimatePresence, useMotionValue, useTransform } from 'framer-motion';
-import { useSwipeable } from 'react-swipeable';
 import { GameStats } from '../types/gameTypes';
 import { gameCards } from '../data/gameCards';
 
@@ -53,16 +52,6 @@ const CardImage = styled.div<{ image: string }>`
   background-size: cover;
   background-position: center;
   position: relative;
-
-  &::before {
-    content: '';
-    position: absolute;
-    top: 0;
-    left: 0;
-    right: 0;
-    bottom: 0;
-    background: linear-gradient(135deg, rgba(255, 215, 0, 0.2), rgba(255, 165, 0, 0.2));
-  }
 `;
 
 const CardContent = styled.div`
@@ -295,7 +284,6 @@ const GameContainer: React.FC<GameContainerProps> = ({ onStatsUpdate, currentSta
         // Appliquer les changements selon la direction du swipe
         if (currentDirection === 'right') {
           // Swipe vers la droite = accepter
-          const coloredChanges = calculateColoredChanges(currentCard.statsChange);
           setPendingChanges(currentCard.statsChange);
           onPendingChanges?.(currentCard.statsChange);
         } else if (currentDirection === 'left') {
@@ -305,7 +293,6 @@ const GameContainer: React.FC<GameContainerProps> = ({ onStatsUpdate, currentSta
             return acc;
           }, {} as Partial<GameStats>);
 
-          const coloredChanges = calculateColoredChanges(invertedChanges);
           setPendingChanges(invertedChanges);
           onPendingChanges?.(invertedChanges);
         }
@@ -320,7 +307,16 @@ const GameContainer: React.FC<GameContainerProps> = ({ onStatsUpdate, currentSta
     });
 
     return unsubscribe;
-  }, [x, currentCard, onPendingChanges, currentStats]);
+  }, [x, currentCard, onPendingChanges]);
+
+  // Réinitialiser les highlights quand on change de carte
+  useEffect(() => {
+    // Réinitialiser seulement si on n'est pas en train de drag
+    if (Math.abs(x.get()) < 10) {
+      setPendingChanges(null);
+      onPendingChanges?.(null);
+    }
+  }, [currentCardIndex, onPendingChanges, x]);
 
   const checkGameOver = (newStats: GameStats) => {
     // Vérifier si une stat atteint 0 ou 100 (défaite uniquement)
@@ -338,16 +334,30 @@ const GameContainer: React.FC<GameContainerProps> = ({ onStatsUpdate, currentSta
     setPendingChanges(null);
     onPendingChanges?.(null);
 
-    // Calculer les nouvelles stats
+    // Déterminer les changements selon la direction
+    let changesToApply: Partial<GameStats>;
+    
+    if (direction === 'right') {
+      // Swipe vers la droite = accepter (changements normaux)
+      changesToApply = currentCard.statsChange;
+    } else {
+      // Swipe vers la gauche = refuser (changements inversés)
+      changesToApply = Object.entries(currentCard.statsChange).reduce((acc, [key, value]) => {
+        acc[key as keyof GameStats] = -value;
+        return acc;
+      }, {} as Partial<GameStats>);
+    }
+
+    // Calculer les nouvelles stats avec les changements corrects
     const newStats = {
-      environnement: Math.max(0, Math.min(100, currentStats.environnement + (currentCard.statsChange.environnement || 0))),
-      intelligenceArtificielle: Math.max(0, Math.min(100, currentStats.intelligenceArtificielle + (currentCard.statsChange.intelligenceArtificielle || 0))),
-      humanite: Math.max(0, Math.min(100, currentStats.humanite + (currentCard.statsChange.humanite || 0))),
-      ethique: Math.max(0, Math.min(100, currentStats.ethique + (currentCard.statsChange.ethique || 0)))
+      environnement: Math.max(0, Math.min(100, currentStats.environnement + (changesToApply.environnement || 0))),
+      intelligenceArtificielle: Math.max(0, Math.min(100, currentStats.intelligenceArtificielle + (changesToApply.intelligenceArtificielle || 0))),
+      humanite: Math.max(0, Math.min(100, currentStats.humanite + (changesToApply.humanite || 0))),
+      ethique: Math.max(0, Math.min(100, currentStats.ethique + (changesToApply.ethique || 0)))
     };
 
     // Appliquer les changements de stats
-    onStatsUpdate(currentCard.statsChange);
+    onStatsUpdate(changesToApply);
 
     // Vérifier les conditions de fin de jeu avec les nouvelles stats
     const result = checkGameOver(newStats);
@@ -361,6 +371,9 @@ const GameContainer: React.FC<GameContainerProps> = ({ onStatsUpdate, currentSta
     // Passer à la carte suivante
     if (currentCardIndex < gameCards.length - 1) {
       setCurrentCardIndex(prev => prev + 1);
+      // Réinitialiser les highlights pour la nouvelle carte
+      setPendingChanges(null);
+      onPendingChanges?.(null);
     } else {
       setGameResult('neutral');
       setGameOver(true);
@@ -436,12 +449,6 @@ const GameContainer: React.FC<GameContainerProps> = ({ onStatsUpdate, currentSta
 
     return { analysis, resultType, criticalReason };
   };
-
-  const swipeHandlers = useSwipeable({
-    onSwipedLeft: () => handleSwipe('left'),
-    onSwipedRight: () => handleSwipe('right'),
-    trackMouse: true
-  });
 
   if (gameOver) {
     const { analysis, resultType, criticalReason } = analyzeFinalStats();
@@ -538,12 +545,6 @@ const GameContainer: React.FC<GameContainerProps> = ({ onStatsUpdate, currentSta
 
   return (
     <GameContainerWrapper className='game-container'>
-      <ProgressIndicator>
-        📋 Carte {currentCardIndex + 1} sur {gameCards.length}
-        <ProgressBar>
-          <ProgressFill progress={((currentCardIndex + 1) / gameCards.length) * 100} />
-        </ProgressBar>
-      </ProgressIndicator>
 
       <CardContainer>
         <SwipeLeft>👎</SwipeLeft>
@@ -553,7 +554,6 @@ const GameContainer: React.FC<GameContainerProps> = ({ onStatsUpdate, currentSta
           <GameCard
             className='card'
             key={`${currentCard.id}-${currentCardIndex}`}
-            {...swipeHandlers}
             initial={{ scale: 0.8, opacity: 0, x: 0, rotate: 0 }}
             animate={{ scale: 1, opacity: 1, x: 0, rotate: 0 }}
             exit={{ scale: 0.8, opacity: 0 }}
@@ -586,11 +586,11 @@ const GameContainer: React.FC<GameContainerProps> = ({ onStatsUpdate, currentSta
       </CardContainer>
 
       <SwipeInstructions className='swipe-instructions'>
-        <div>👈 Refuser la demande</div>
-        <div>👉 Accepter la demande</div>
-        <div style={{ fontSize: '0.85rem', marginTop: '8px', opacity: 0.7 }}>
-          Maintenez l'équilibre entre toutes les dimensions !
-        </div>
+      📋 Carte {currentCardIndex + 1} sur {gameCards.length}
+      <ProgressBar>
+          <ProgressFill progress={((currentCardIndex + 1) / gameCards.length) * 100} />
+        </ProgressBar>
+        <div>👈 Refuser | Accepter 👉 </div>
       </SwipeInstructions>
     </GameContainerWrapper>
   );

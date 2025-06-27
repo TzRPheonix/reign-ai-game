@@ -1,16 +1,8 @@
-# IA for Good - Gestionnaire d'Intelligence Artificielle
+# IA for Good - Mini Jeu de Choix
 
 ## 🎮 Description du Projet
 
-**IA for Good** est un mini-jeu web interactif où vous incarnez le **gestionnaire principal d'une Intelligence Artificielle** dédiée au bien commun. Le peuple vous présente des demandes d'utilisation de l'IA, et votre mission est de maintenir l'équilibre entre innovation, environnement, impact social et durabilité.
-
-### 🎯 Concept Principal
-- **Rôle de gestionnaire** : Vous dirigez l'IA for Good
-- **Demandes du peuple** : Le public vous soumet des propositions
-- **Interface swipe** intuitive (droite = accepter, gauche = refuser)
-- **4 statistiques** en temps réel : Environnement, Innovation, Impact Social, Durabilité
-- **12 scénarios** réalistes d'IA for Good
-- **Conditions de défaite** : Une dimension qui prend le dessus = échec critique !
+**IA for Good** est un mini-jeu interactif inspiré du jeu Reign, où les joueurs prennent des décisions sur l'utilisation de l'Intelligence Artificielle pour le bien commun. Le jeu présente des scénarios réalistes liés à l'IA et ses impacts sur l'environnement, l'innovation, l'impact social et la durabilité.
 
 ## 🌱 Message Écologique et Éthique
 
@@ -19,12 +11,6 @@ Le jeu transmet un message clair sur l'importance de l'IA responsable et durable
 - **Innovation** : Avancées technologiques responsables
 - **Impact Social** : Effets sur la société et les individus
 - **Durabilité** : Long-termisme et développement durable
-
-### ⚠️ Conditions de Jeu
-- **Échec critique** si une statistique atteint 0 ou 100
-- **Victoire** si toutes les stats restent équilibrées (30-70)
-- **Valeurs équilibrées** : Maximum ±15 points par décision
-- **Choix difficiles** : Autant de demandes positives que négatives
 
 ## 🎯 Public Cible
 
@@ -36,24 +22,22 @@ Le jeu transmet un message clair sur l'importance de l'IA responsable et durable
 ## 🚀 Fonctionnalités
 
 ### Interface Interactive
-- **Swipe à droite/gauche** pour accepter/refuser les demandes
+- **Swipe à droite/gauche** pour accepter/refuser les propositions
 - **Animations fluides** avec Framer Motion
 - **Design responsive** adapté mobile et desktop
-- **Statistiques en temps réel** avec indicateurs critiques
-- **Barre de progression** pour suivre l'avancement
+- **Statistiques en temps réel** des 4 indicateurs
 
 ### Scénarios Réalistes
-- **12 cartes de décision** variées
-- **Demandes du peuple** : écoles, hôpitaux, municipalités, etc.
-- **Conséquences équilibrées** et réalistes
-- **Explications pédagogiques** pour chaque choix
+- 10 cartes de décision variées
+- Situations concrètes d'IA for Good
+- Conséquences équilibrées et réalistes
+- Explications pédagogiques
 
 ### Expérience Utilisateur
-- **Interface intuitive** et moderne
-- **Feedback visuel immédiat** avec animations
-- **Indicateurs critiques** pour les valeurs dangereuses
-- **Écrans de fin** différenciés (victoire/défaite/fin normale)
-- **Possibilité de rejouer** avec reset complet
+- Interface intuitive et moderne
+- Feedback visuel immédiat
+- Progression claire du jeu
+- Possibilité de rejouer
 
 ## 🛠️ Technologies Utilisées
 
@@ -77,13 +61,12 @@ Le jeu est optimisé pour mobile avec :
 - **Vert** (#4CAF50, #27ae60) : Environnement et durabilité
 - **Bleu** (#3498db) : Innovation et technologie
 - **Orange** (#f39c12) : Impact social
-- **Rouge** (#e74c3c) : Alertes et valeurs critiques
+- **Rouge** (#e74c3c) : Alertes et défis
 
-### Interface Moderne
-- **Glassmorphism** : Effet de verre moderne
-- **Animations fluides** : Framer Motion
-- **Responsive design** : Mobile-first
-- **Typographie claire** : Segoe UI
+### Typographie Moderne
+- Police sans-serif lisible
+- Hiérarchie visuelle claire
+- Contrastes optimisés
 
 ## 🏆 Critères d'Évaluation Répondus
 
@@ -91,31 +74,26 @@ Le jeu est optimisé pour mobile avec :
 - Scénarios centrés sur l'IA responsable
 - Impact environnemental explicite
 - Choix éthiques clairs
-- Conditions de défaite pour déséquilibre
 
 ### ✅ Originalité et Esthétisme
 - Design unique et moderne
 - Interface intuitive
 - Animations fluides
-- Rôle de gestionnaire innovant
 
 ### ✅ Cohérence
 - Message uniforme sur toutes les cartes
 - Design cohérent
 - Expérience utilisateur fluide
-- Narration cohérente
 
 ### ✅ Innovation
 - Approche gamifiée de l'éducation à l'IA
 - Interface swipe moderne
 - Feedback en temps réel
-- Conditions de jeu équilibrées
 
 ### ✅ Public Cible
 - Adapté aux jeunes adultes
 - Interface mobile-first
 - Contenu accessible
-- Rôle engageant
 
 ## 🚀 Installation et Lancement
 
@@ -138,18 +116,12 @@ Le jeu suit 4 indicateurs clés :
 - **Impact Social** : Effets sur la société
 - **Durabilité** : Long-termisme des choix
 
-### Conditions de Victoire/Défaite
-- **Échec** : Une stat atteint 0 ou 100
-- **Victoire** : Toutes les stats restent entre 30 et 70
-- **Fin normale** : Terminer toutes les cartes
-
 ## 🎯 Objectifs Pédagogiques
 
 1. **Sensibiliser** aux enjeux de l'IA responsable
 2. **Éduquer** sur les impacts environnementaux
 3. **Encourager** la réflexion éthique
 4. **Promouvoir** l'innovation durable
-5. **Démontrer** l'importance de l'équilibre
 
 ## 🔮 Évolutions Futures
 
@@ -158,10 +130,7 @@ Le jeu suit 4 indicateurs clés :
 - Système de scores
 - Partage sur réseaux sociaux
 - Version mobile native
-- Personnalisation du gestionnaire
 
 ---
 
 **Développé avec ❤️ pour un avenir IA responsable et durable**
-
-*Vous êtes le gestionnaire de l'IA for Good. Le peuple compte sur vous ! 🌱🤖*

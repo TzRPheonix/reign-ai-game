@@ -15,7 +15,6 @@ const AppContainer = styled.div`
   flex-direction: column;
   align-items: center;
   justify-content: center;
-  padding: 15px;
   font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
   position: relative;
   overflow: hidden;
@@ -394,7 +393,6 @@ function App() {
 
       <Header>
         <Title>IA for Good</Title>
-        <Subtitle>Gestionnaire d'Intelligence Artificielle</Subtitle>
       </Header>
 
       {!gameStarted ? (
@@ -411,7 +409,6 @@ function App() {
         </RoleDescription>
       ) : (
         <GameWrapper>
-          <StatsDisplay stats={gameStats} pendingChanges={pendingChanges} />
           {gameEnded ? (
             <GameEndContainer>
               <GameEndTitle>💥 FIN DE PARTIE</GameEndTitle>
@@ -427,6 +424,7 @@ function App() {
               onPendingChanges={handlePendingChanges}
             />
           )}
+          <StatsDisplay stats={gameStats} pendingChanges={pendingChanges} />
         </GameWrapper>
       )}
     </AppContainer>

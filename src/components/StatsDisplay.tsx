@@ -44,14 +44,14 @@ const StatItem = styled.div<{ isHighlighted: boolean; highlightColor?: string }>
     if (!props.isHighlighted) return 'rgba(255, 255, 255, 0.1)';
     if (props.highlightColor === 'red') return 'rgba(255, 107, 107, 0.3)';
     if (props.highlightColor === 'green') return 'rgba(76, 175, 80, 0.3)';
-    return 'rgba(255, 215, 0, 0.3)';
+    return 'rgba(255, 255, 255, 0.1)';
   }};
   border-radius: 12px;
   border: 1px solid ${props => {
     if (!props.isHighlighted) return 'rgba(255, 255, 255, 0.2)';
     if (props.highlightColor === 'red') return 'rgba(255, 107, 107, 0.6)';
     if (props.highlightColor === 'green') return 'rgba(76, 175, 80, 0.6)';
-    return 'rgba(255, 215, 0, 0.6)';
+    return 'rgba(255, 255, 255, 0.2)';
   }};
   transition: all 0.3s ease;
   position: relative;
@@ -60,7 +60,7 @@ const StatItem = styled.div<{ isHighlighted: boolean; highlightColor?: string }>
     if (!props.isHighlighted) return 'none';
     if (props.highlightColor === 'red') return '0 0 20px rgba(255, 107, 107, 0.4)';
     if (props.highlightColor === 'green') return '0 0 20px rgba(76, 175, 80, 0.4)';
-    return '0 0 20px rgba(255, 215, 0, 0.4)';
+    return 'none';
   }};
 
   &:hover {
@@ -68,30 +68,30 @@ const StatItem = styled.div<{ isHighlighted: boolean; highlightColor?: string }>
       if (!props.isHighlighted) return 'rgba(255, 255, 255, 0.15)';
       if (props.highlightColor === 'red') return 'rgba(255, 107, 107, 0.4)';
       if (props.highlightColor === 'green') return 'rgba(76, 175, 80, 0.4)';
-      return 'rgba(255, 215, 0, 0.4)';
+      return 'rgba(255, 255, 255, 0.15)';
     }};
     transform: scale(1.02);
   }
 
-  ${props => props.isHighlighted && `
+  ${props => props.isHighlighted && props.highlightColor && `
     animation: highlightPulse 2s ease-in-out infinite;
 
     @keyframes highlightPulse {
       0%, 100% {
         box-shadow: ${props.highlightColor === 'red' ? '0 0 20px rgba(255, 107, 107, 0.4)' :
                      props.highlightColor === 'green' ? '0 0 20px rgba(76, 175, 80, 0.4)' :
-                     '0 0 20px rgba(255, 215, 0, 0.4)'};
+                     'none'};
         border-color: ${props.highlightColor === 'red' ? 'rgba(255, 107, 107, 0.6)' :
                        props.highlightColor === 'green' ? 'rgba(76, 175, 80, 0.6)' :
-                       'rgba(255, 215, 0, 0.6)'};
+                       'rgba(255, 255, 255, 0.2)'};
       }
       50% {
         box-shadow: ${props.highlightColor === 'red' ? '0 0 30px rgba(255, 107, 107, 0.7)' :
                      props.highlightColor === 'green' ? '0 0 30px rgba(76, 175, 80, 0.7)' :
-                     '0 0 30px rgba(255, 215, 0, 0.7)'};
+                     'none'};
         border-color: ${props.highlightColor === 'red' ? 'rgba(255, 107, 107, 0.8)' :
                        props.highlightColor === 'green' ? 'rgba(76, 175, 80, 0.8)' :
-                       'rgba(255, 215, 0, 0.8)'};
+                       'rgba(255, 255, 255, 0.2)'};
       }
     }
   `}
@@ -266,16 +266,12 @@ const StatsDisplay: React.FC<StatsDisplayProps> = ({ stats, pendingChanges }) =>
   const getHighlightColor = (statKey: keyof GameStats): string | undefined => {
     if (!pendingChanges || pendingChanges[statKey] === undefined) return undefined;
 
-    const currentValue = stats[statKey];
     const change = pendingChanges[statKey]!;
-    const newValue = currentValue + change;
-
-    // Calculer la distance par rapport au centre (50)
-    const currentDistance = Math.abs(currentValue - 50);
-    const newDistance = Math.abs(newValue - 50);
-
-    // Rouge si on s'éloigne du centre, vert si on s'en rapproche
-    return newDistance > currentDistance ? 'red' : 'green';
+    
+    // Rouge pour les changements négatifs, vert pour les positifs
+    if (change > 0) return 'green';
+    if (change < 0) return 'red';
+    return undefined; // Gris pour les changements nuls
   };
 
   return (

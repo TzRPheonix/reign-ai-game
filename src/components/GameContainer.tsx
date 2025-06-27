@@ -451,6 +451,34 @@ const GameContainer: React.FC<GameContainerProps> = ({ onStatsUpdate, currentSta
       direction: criticalStat[1] >= 90 ? 'trop élevée' : 'trop basse'
     } : null;
 
+    // Fonction pour générer une phrase thématique selon la raison de la défaite
+    const getThematicMessage = (criticalReason: any) => {
+      if (!criticalReason) return "L'équilibre a été perdu...";
+      
+      const { stat, direction } = criticalReason;
+      
+      const messages = {
+        environnement: {
+          'trop élevée': "🌱 La nature a repris le contrôle, l'écologie est devenue tyrannique...",
+          'trop basse': "🌱 La planète s'effondre, l'humanité a détruit son habitat..."
+        },
+        intelligenceArtificielle: {
+          'trop élevée': "🤖 L'IA est devenue incontrôlable, les machines ont pris le pouvoir...",
+          'trop basse': "🤖 L'humanité a rejeté le progrès, la technologie a été abandonnée..."
+        },
+        humanite: {
+          'trop élevée': "👥 L'humanité est devenue dépendante, l'individualité a disparu...",
+          'trop basse': "👥 L'humanité a été sacrifiée, les machines ont remplacé les hommes..."
+        },
+        ethique: {
+          'trop élevée': "⚖️ L'éthique est devenue paralysante, aucune décision n'est possible...",
+          'trop basse': "⚖️ L'éthique a été oubliée, le chaos moral règne..."
+        }
+      };
+      
+      return messages[stat as keyof typeof messages]?.[direction as keyof typeof messages.environnement] || "L'équilibre a été perdu...";
+    };
+
     const analysis = {
       environnement: {
         status: stats.environnement <= 20 ? 'critique' : stats.environnement <= 40 ? 'faible' : stats.environnement >= 80 ? 'excellent' : 'équilibré',
@@ -493,11 +521,11 @@ const GameContainer: React.FC<GameContainerProps> = ({ onStatsUpdate, currentSta
     else if (isBalanced && !hasLow) resultType = 'victory';
     else if (hasExcellent && !hasLow) resultType = 'success';
 
-    return { analysis, resultType, criticalReason };
+    return { analysis, resultType, criticalReason, thematicMessage: getThematicMessage(criticalReason) };
   };
 
   if (gameOver) {
-    const { analysis, resultType, criticalReason } = analyzeFinalStats();
+    const { analysis, resultType, criticalReason, thematicMessage } = analyzeFinalStats();
 
     return (
       <GameContainerWrapper>
@@ -509,10 +537,10 @@ const GameContainer: React.FC<GameContainerProps> = ({ onStatsUpdate, currentSta
                 {criticalReason && (
                   <div style={{ marginBottom: '15px', padding: '12px', background: 'rgba(255, 107, 107, 0.2)', borderRadius: '8px', border: '1px solid rgba(255, 107, 107, 0.3)' }}>
                     <p style={{ margin: '0 0 8px 0', color: '#FF6B6B', fontWeight: 'bold' }}>
-                      🚨 Cause de l'échec : {criticalReason.stat === 'environnement' ? '🌱 Environnement' :
-                                            criticalReason.stat === 'intelligence Artificielle' ? '🤖 Intelligence Artificielle' :
-                                            criticalReason.stat === 'humanite' ? '👥 Humanité' : '⚖️ Éthique'}
-                      a atteint {criticalReason.value} !
+                      🚨 Cause de l'échec : {criticalReason.stat === 'environnement' ? '🌱 L\'environnement' :
+                                            criticalReason.stat === 'intelligenceArtificielle' ? '🤖 L\'intelligence artificielle' :
+                                            criticalReason.stat === 'humanite' ? '👥 L\'humanité' : '⚖️ L\'éthique'}
+                      {criticalReason.direction === 'trop élevée' ? ' est devenue excessive' : ' a été négligée'} !
                     </p>
                     <p style={{ margin: '0', fontSize: '0.9rem', opacity: '0.9' }}>
                       {criticalReason.direction === 'trop élevée' ?
@@ -522,8 +550,18 @@ const GameContainer: React.FC<GameContainerProps> = ({ onStatsUpdate, currentSta
                     </p>
                   </div>
                 )}
+                <p style={{ 
+                  fontSize: '1.1rem', 
+                  fontStyle: 'italic', 
+                  color: '#FFD700', 
+                  marginBottom: '15px',
+                  textAlign: 'center',
+                  textShadow: '0 2px 4px rgba(0,0,0,0.5)'
+                }}>
+                  {thematicMessage}
+                </p>
                 <p>L'IA a perdu son équilibre et ne peut plus servir le bien commun efficacement.</p>
-                <p>Vous avez survécu {currentCardIndex} mois sur {gameCards.length}.</p>
+                <p>Vous avez survécu {currentCardIndex} années sur {gameCards.length}.</p>
 
                 <div style={{ marginTop: '20px', textAlign: 'left' }}>
                   <h4 style={{ color: '#FFD700', marginBottom: '10px' }}>📊 Analyse Détaillée :</h4>
@@ -544,7 +582,7 @@ const GameContainer: React.FC<GameContainerProps> = ({ onStatsUpdate, currentSta
                 <h3>🏆 Victoire Équilibrée</h3>
                 <p>Félicitations ! Vous avez réussi à maintenir un équilibre parfait entre toutes les dimensions.</p>
                 <p>Votre gestion de l'IA for Good a été exemplaire et responsable.</p>
-                <p>Vous avez terminé {gameCards.length} mois de mandat avec succès !</p>
+                <p>Vous avez terminé {gameCards.length} années de mandat avec succès !</p>
 
                 <div style={{ marginTop: '20px', textAlign: 'left' }}>
                   <h4 style={{ color: '#4CAF50', marginBottom: '10px' }}>📊 Analyse Détaillée :</h4>
@@ -565,7 +603,7 @@ const GameContainer: React.FC<GameContainerProps> = ({ onStatsUpdate, currentSta
                 <h3>🏁 Fin de Mandat</h3>
                 <p>Vous avez terminé votre période de gestion de l'IA for Good.</p>
                 <p>Vos décisions ont façonné l'avenir de l'IA pour le bien commun.</p>
-                <p>Vous avez survécu {gameCards.length} mois complets !</p>
+                <p>Vous avez survécu {gameCards.length} années complets !</p>
 
                 <div style={{ marginTop: '20px', textAlign: 'left' }}>
                   <h4 style={{ color: '#FFD700', marginBottom: '10px' }}>📊 Analyse Détaillée :</h4>

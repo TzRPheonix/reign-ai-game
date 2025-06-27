@@ -335,12 +335,24 @@ function App() {
       for (const [statName, value] of stats) {
         if (value <= 0) {
           setGameEnded(true);
-          setEndReason(`Échec critique : ${statName} a atteint 0 !`);
+          const statLabel = statName === 'environnement' ? '🌱 L\'environnement' :
+                           statName === 'intelligenceArtificielle' ? '🤖 L\'intelligence artificielle' :
+                           statName === 'humanite' ? '👥 L\'humanité' : '⚖️ L\'éthique';
+          const statMessage = statName === 'environnement' ? 'a été détruite par l\'humanité' :
+                             statName === 'intelligenceArtificielle' ? 'a été abandonnée par l\'humanité' :
+                             statName === 'humanite' ? 'a été sacrifiée pour la technologie' : 'a été oubliée par tous';
+          setEndReason(`${statLabel} ${statMessage} !`);
           return;
         }
         if (value >= 100) {
           setGameEnded(true);
-          setEndReason(`Échec critique : ${statName} a atteint 100 !`);
+          const statLabel = statName === 'environnement' ? '🌱 L\'environnement' :
+                           statName === 'intelligenceArtificielle' ? '🤖 L\'intelligence artificielle' :
+                           statName === 'humanite' ? '👥 L\'humanité' : '⚖️ L\'éthique';
+          const statMessage = statName === 'environnement' ? 'a repris le contrôle de la planète' :
+                             statName === 'intelligenceArtificielle' ? 'a pris le contrôle de l\'humanité' :
+                             statName === 'humanite' ? 'a rejeté toute technologie' : 'a paralysé toute décision';
+          setEndReason(`${statLabel} ${statMessage} !`);
           return;
         }
       }
